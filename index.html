@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -77,6 +76,7 @@
     border-left: 6px solid var(--fd-blue);
     padding: 20px; display: flex; align-items: center; gap: 20px;
   }
+  .on-air.stale { border-left-color: var(--fd-muted); opacity: 0.75; }
   .on-air .cover {
     width: 100px; height: 100px; background: var(--fd-gray);
     background-size: cover; background-position: center;
@@ -93,6 +93,8 @@
     background: var(--fd-blue-2); border-radius: 50%;
     animation: blink 1.5s infinite;
   }
+  .on-air.stale .label { color: var(--fd-muted); }
+  .on-air.stale .label::before { background: var(--fd-muted); animation: none; }
   .on-air .titre {
     font-size: 26px; font-weight: 900; color: var(--fd-black);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -119,6 +121,7 @@
     font-size: 38px; font-weight: 900; color: var(--fd-blue);
     margin-top: 4px;
   }
+  .on-air.stale .countdown-value { color: var(--fd-muted); }
   .kpis {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1px; background: var(--fd-border);
@@ -288,132 +291,229 @@
 </div>
 
 <footer>
-  <strong>FREE DOM 2 MONITOR</strong> · Playlist freedom.fr · Enrichissement iTunes · v1.1
+  <strong>FREE DOM 2 MONITOR</strong> · Playlist freedom.fr · Enrichissement iTunes · v1.2
 </footer>
 
 <script>
+// ============================================================
+// CONFIG
+// ============================================================
 const AUTO_REFRESH = 120000;
-let DERNIER_TS = 0;
+const SEUIL_VIEUX_MORCEAU = 600; // 10 min sans nouveau morceau = stale
+const BLUE = '#003da5';
+const BLUE2 = '#0066cc';
 
+// ============================================================
+// ÉTAT
+// ============================================================
+let DERNIER_TS = 0;
+let DERNIER_MORCEAU_TS = 0;
+let DERNIER_MORCEAU_DUREE = 0;
+
+// ============================================================
+// CHARGEMENT
+// ============================================================
 async function charger() {
   const etat = document.getElementById('etat');
   try {
     const rep = await fetch('data.json?t=' + Date.now());
     if (!rep.ok) throw new Error('HTTP ' + rep.status);
     const data = await rep.json();
+
+    // Détecte si un seul flux ou plusieurs (clé "chaines" / "flux")
+    const flux = data.flux || data.chaines || data;
+    const principal = Array.isArray(flux) ? flux[0] : flux;
+
     etat.className = '';
     etat.textContent = 'Données synchronisées';
     document.getElementById('horodatage').textContent =
-      'Mise à jour : ' + new Date(data.genere_ts * 1000).toLocaleString('fr-FR');
-    construire(data);
-    chargerOnAir(data.dernier_morceau);
+      'Mise à jour : ' + new Date((data.genere_ts || Date.now() / 1000) * 1000).toLocaleString('fr-FR');
+
+    construire(principal);
+    chargerOnAir(principal.dernier_morceau);
   } catch (e) {
     etat.className = 'erreur';
     etat.textContent = 'Erreur : ' + e.message;
   }
 }
 
+// ============================================================
+// CONSTRUCTION
+// ============================================================
 function construire(d) {
   const vide = '<div class="vide">Pas encore de données</div>';
+
+  // --- KPIs ---
   const vol = d.volume || {};
   const kpis = [
     ['Diffusions', vol.nb_diffusions || 0],
     ['Artistes', vol.nb_artistes || 0],
     ['Titres', vol.nb_titres || 0],
-    ['Heures', (vol.heures || 0).toFixed(2)],
-    ['Durée moy.', (vol.duree_moy || 0).toFixed(0) + 's']
+    ['Heures', Number(vol.heures || 0).toFixed(2)],
+    ['Durée moy.', Number(vol.duree_moy || vol.duree_moy_s || 0).toFixed(0) + 's']
   ];
   document.getElementById('kpis').innerHTML = kpis.map(function(k) {
     return '<div class="kpi"><div class="kpi-label">' + k[0] + '</div><div class="kpi-value">' + k[1] + '</div></div>';
   }).join('');
 
-  const layout = {
+  // --- Layouts Plotly ---
+  const layoutBar = {
     paper_bgcolor: '#fff', plot_bgcolor: '#fff',
     font: { color: '#1a1a1a', size: 11, family: 'Helvetica Neue, Arial' },
-    margin: { l: 150, r: 20, t: 10, b: 40 },
+    margin: { l: 180, r: 20, t: 10, b: 40 },
+    xaxis: { gridcolor: '#eef', zerolinecolor: '#ccc' },
+    yaxis: { gridcolor: '#eef', zerolinecolor: '#ccc', autorange: 'reversed' }
+  };
+  const layoutBase = {
+    paper_bgcolor: '#fff', plot_bgcolor: '#fff',
+    font: { color: '#1a1a1a', size: 11, family: 'Helvetica Neue, Arial' },
+    margin: { l: 40, r: 20, t: 10, b: 40 },
     xaxis: { gridcolor: '#eef', zerolinecolor: '#ccc' },
     yaxis: { gridcolor: '#eef', zerolinecolor: '#ccc' }
   };
+  const layoutDonut = {
+    paper_bgcolor: '#fff', plot_bgcolor: '#fff',
+    font: { color: '#1a1a1a', size: 11, family: 'Helvetica Neue, Arial' },
+    margin: { l: 20, r: 20, t: 10, b: 20 },
+    showlegend: true,
+    legend: { orientation: 'v', x: 1, y: 0.5 }
+  };
   const opts = { displayModeBar: false, responsive: true };
-  const BLUE = '#003da5', BLUE2 = '#0066cc';
 
-  if (d.top_artistes && d.top_artistes.length) {
-    const a = d.top_artistes.slice(0, 15);
+  // --- Top artistes ---
+  const dArt = d.top_artistes;
+  if (dArt && dArt.length) {
+    const top = dArt.slice(0, 15);
+    const colVal = ('minutes' in top[0]) ? 'minutes' : 'nb_diffusions';
     Plotly.newPlot('chart-artistes', [{
       type: 'bar', orientation: 'h',
-      x: a.map(function(r) { return r.minutes || r.nb_diffusions; }),
-      y: a.map(function(r) { return r.artistes; }),
-      marker: { color: BLUE }
-    }], Object.assign({}, layout, { yaxis: { autorange: 'reversed' } }), opts);
+      x: top.map(function(r) { return r[colVal]; }),
+      y: top.map(function(r) { return r.artistes; }),
+      marker: { color: BLUE },
+      text: top.map(function(r) { return r[colVal]; }),
+      textposition: 'outside',
+      hovertemplate: '%{y}<br>%{x} ' + (colVal === 'minutes' ? 'minutes' : 'diffusions') + '<extra></extra>'
+    }], layoutBar, opts);
   } else document.getElementById('chart-artistes').innerHTML = vide;
 
-  if (d.top_titres && d.top_titres.length) {
-    const t = d.top_titres.slice(0, 15);
+  // --- Top titres ---
+  const dTit = d.top_titres;
+  if (dTit && dTit.length) {
+    const top = dTit.slice(0, 15);
     Plotly.newPlot('chart-titres', [{
       type: 'bar', orientation: 'h',
-      x: t.map(function(r) { return r.nb_diffusions; }),
-      y: t.map(function(r) { return (r.artistes || '') + ' – ' + (r.titre || ''); }),
-      marker: { color: BLUE2 }
-    }], Object.assign({}, layout, { yaxis: { autorange: 'reversed' } }), opts);
+      x: top.map(function(r) { return r.nb_diffusions; }),
+      y: top.map(function(r) {
+        const s = (r.artistes || '') + ' – ' + (r.titre || '');
+        return s.length > 40 ? s.slice(0, 38) + '…' : s;
+      }),
+      marker: { color: BLUE2 },
+      text: top.map(function(r) { return r.nb_diffusions; }),
+      textposition: 'outside',
+      hovertemplate: '%{y}<br>%{x} diffusions<extra></extra>'
+    }], layoutBar, opts);
   } else document.getElementById('chart-titres').innerHTML = vide;
 
-  if (d.heures && d.heures.length) {
+  // --- Par heure ---
+  const dHeure = d.heures;
+  if (dHeure && dHeure.length) {
     Plotly.newPlot('chart-heures', [{
-      type: 'bar', x: d.heures.map(function(r) { return r.heure; }),
-      y: d.heures.map(function(r) { return r.nb; }),
-      marker: { color: BLUE }
-    }], Object.assign({}, layout, { margin: { l: 40, r: 20, t: 10, b: 40 } }), opts);
+      type: 'bar',
+      x: dHeure.map(function(r) { return (r.heure != null ? r.heure : '?') + 'h'; }),
+      y: dHeure.map(function(r) { return r.nb; }),
+      marker: { color: BLUE },
+      hovertemplate: '%{x} → %{y} diffusions<extra></extra>'
+    }], layoutBase, opts);
   } else document.getElementById('chart-heures').innerHTML = vide;
 
-  if (d.semaine && d.semaine.length) {
+  // --- Par jour de la semaine ---
+  const dSem = d.semaine;
+  if (dSem && dSem.length) {
     Plotly.newPlot('chart-semaine', [{
-      type: 'bar', x: d.semaine.map(function(r) { return r.jour; }),
-      y: d.semaine.map(function(r) { return r.nb; }),
-      marker: { color: BLUE2 }
-    }], Object.assign({}, layout, { margin: { l: 40, r: 20, t: 10, b: 40 } }), opts);
+      type: 'bar',
+      x: dSem.map(function(r) { return r.jour; }),
+      y: dSem.map(function(r) { return r.nb; }),
+      marker: { color: BLUE2 },
+      hovertemplate: '%{x} → %{y} diffusions<extra></extra>'
+    }], layoutBase, opts);
   } else document.getElementById('chart-semaine').innerHTML = vide;
 
-  if (d.jours && d.jours.length) {
+  // --- Évolution journalière ---
+  const dJour = d.jours;
+  if (dJour && dJour.length) {
     Plotly.newPlot('chart-jours', [{
       type: 'scatter', mode: 'lines+markers',
-      x: d.jours.map(function(r) { return r.date; }),
-      y: d.jours.map(function(r) { return r.nb; }),
+      x: dJour.map(function(r) { return r.date; }),
+      y: dJour.map(function(r) { return r.nb; }),
       line: { color: BLUE, width: 3 },
       marker: { size: 10, color: BLUE },
-      fill: 'tozeroy', fillcolor: 'rgba(0, 61, 165, 0.08)'
-    }], Object.assign({}, layout, { margin: { l: 40, r: 20, t: 10, b: 60 } }), opts);
+      fill: 'tozeroy', fillcolor: 'rgba(0, 61, 165, 0.08)',
+      hovertemplate: '%{x}<br>%{y} diffusions<extra></extra>'
+    }], Object.assign({}, layoutBase, { margin: { l: 40, r: 20, t: 10, b: 60 } }), opts);
   } else document.getElementById('chart-jours').innerHTML = vide;
 
-  if (d.annees && d.annees.length) {
+  // --- Par année ---
+  const dAn = d.annees;
+  if (dAn && dAn.length) {
+    const tri = dAn.slice().sort(function(a, b) {
+      return (a.annee || 0) - (b.annee || 0);
+    });
     Plotly.newPlot('chart-annees', [{
-      type: 'bar', x: d.annees.map(function(r) { return r.annee; }),
-      y: d.annees.map(function(r) { return r.nb_diffusions; }),
-      marker: { color: BLUE2 }
-    }], Object.assign({}, layout, { margin: { l: 40, r: 20, t: 10, b: 40 } }), opts);
+      type: 'bar',
+      x: tri.map(function(r) { return r.annee; }),
+      y: tri.map(function(r) { return r.nb_diffusions; }),
+      marker: { color: BLUE2 },
+      hovertemplate: '%{x} → %{y} diffusions<extra></extra>'
+    }], Object.assign({}, layoutBase, { xaxis: { gridcolor: '#eef', zerolinecolor: '#ccc', type: 'category' } }), opts);
   } else document.getElementById('chart-annees').innerHTML = vide;
 
-  if (d.explicit && d.explicit.length) {
+  // --- Explicit vs Clean ---
+  const dExp = d.explicit;
+  if (dExp && dExp.length) {
+    const labels = dExp.map(function(r) { return r.type_contenu || '—'; });
+    const vals = dExp.map(function(r) { return Number(r.nb) || 0; });
+    const pcts = dExp.map(function(r) { return Number(r.pct) || 0; });
+    const couleurs = labels.map(function(l) {
+      return /explicit/i.test(l) ? '#c4001e' : BLUE;
+    });
+
     Plotly.newPlot('chart-explicit', [{
-      type: 'pie', labels: d.explicit.map(function(r) { return r.type_contenu; }),
-      values: d.explicit.map(function(r) { return r.nb; }), hole: 0.6,
-      marker: { colors: [BLUE, BLUE2, '#c0c0c0'] },
-      textinfo: 'label+percent'
-    }], Object.assign({}, layout, { margin: { l: 20, r: 20, t: 10, b: 20 } }), opts);
+      type: 'pie', hole: 0.6,
+      labels: labels,
+      values: vals,
+      marker: { colors: couleurs },
+      text: pcts.map(function(p) { return p.toFixed(1) + '%'; }),
+      textinfo: 'label+percent',
+      hovertemplate: '%{label}<br>%{value} diffusions (%{text})<extra></extra>'
+    }], layoutDonut, opts);
   } else document.getElementById('chart-explicit').innerHTML = vide;
 
+  // --- Tableaux ---
   rendreTable('table-albums', d.albums || [], [
-    { c: 'album', t: 'Album' }, { c: 'artistes', t: 'Artiste' }, { c: 'nb', t: 'Diff.' }
-  ], vide);
-  rendreTable('table-recurrents', d.recurrents || [], [
-    { c: 'artistes', t: 'Artiste' }, { c: 'nb_jours', t: 'Jours' }, { c: 'nb_diffusions', t: 'Diff.' }
-  ], vide);
-  rendreTable('table-titres-rec', d.titres_recurrents || [], [
-    { c: 'artistes', t: 'Artiste' }, { c: 'titre', t: 'Titre' }, { c: 'nb_jours', t: 'Jours' }
-  ], vide);
-  rendreTable('table-diversif', d.diversifies || [], [
-    { c: 'artistes', t: 'Artiste' }, { c: 'nb_titres', t: 'Titres' }, { c: 'nb', t: 'Diff.' }
+    { c: 'album', t: 'Album' },
+    { c: 'artistes', t: 'Artiste' },
+    { c: 'nb', t: 'Diff.' }
   ], vide);
 
+  rendreTable('table-recurrents', d.recurrents || [], [
+    { c: 'artistes', t: 'Artiste' },
+    { c: 'nb_jours', t: 'Jours' },
+    { c: 'nb_diffusions', t: 'Diff.' }
+  ], vide);
+
+  rendreTable('table-titres-rec', d.titres_recurrents || [], [
+    { c: 'artistes', t: 'Artiste' },
+    { c: 'titre', t: 'Titre' },
+    { c: 'nb_jours', t: 'Jours' }
+  ], vide);
+
+  rendreTable('table-diversif', d.diversifies || [], [
+    { c: 'artistes', t: 'Artiste' },
+    { c: 'nb_titres', t: 'Titres' },
+    { c: 'nb', t: 'Diff.' }
+  ], vide);
+
+  // --- Derniers morceaux ---
   const derniers = (d.derniers_morceaux || []).slice(0, 15);
   if (derniers.length) {
     let html = '<table><thead><tr><th></th><th>Heure</th><th>Artiste</th><th>Titre</th><th>Album</th></tr></thead><tbody>';
@@ -423,7 +523,11 @@ function construire(d) {
       const pochette = m.cover_deezer
         ? '<span class="pochette-cell" style="background-image:url(\'' + m.cover_deezer + '\')"></span>'
         : '<span class="pochette-cell"></span>';
-      html += '<tr><td style="width:50px">' + pochette + '</td><td>' + heure + '</td><td>' + (m.artistes || '—') + '</td><td>' + (m.titre || '—') + '</td><td>' + (m.album || '—') + '</td></tr>';
+      html += '<tr><td style="width:50px">' + pochette + '</td>' +
+        '<td>' + heure + '</td>' +
+        '<td>' + (m.artistes || '—') + '</td>' +
+        '<td>' + (m.titre || '—') + '</td>' +
+        '<td>' + (m.album || '—') + '</td></tr>';
     }
     html += '</tbody></table>';
     document.getElementById('table-derniers').innerHTML = html;
@@ -432,6 +536,9 @@ function construire(d) {
   }
 }
 
+// ============================================================
+// TABLEAUX
+// ============================================================
 function rendreTable(id, rows, cols, vide) {
   const cible = document.getElementById(id);
   if (!rows || !rows.length) { cible.innerHTML = vide; return; }
@@ -443,8 +550,8 @@ function rendreTable(id, rows, cols, vide) {
     html += '<tr>';
     for (let j = 0; j < cols.length; j++) {
       let v = r[cols[j].c];
-      if (v === undefined || v === null) v = '';
-      if (j === 0 && typeof v === 'string' && cols.length > 1) {
+      if (v === undefined || v === null || v === '') v = '—';
+      if (j === 0 && cols.length > 1) {
         const cls = i < 3 ? 'rang top3' : 'rang';
         v = '<span class="' + cls + '">' + (i + 1) + '</span>' + v;
       }
@@ -455,25 +562,76 @@ function rendreTable(id, rows, cols, vide) {
   cible.innerHTML = html + '</tbody></table>';
 }
 
+// ============================================================
+// ON AIR
+// ============================================================
 function chargerOnAir(r) {
   const bloc = document.getElementById('on-air');
-  if (!r || !r.titre) { bloc.style.display = 'none'; return; }
+  if (!r || !r.titre) {
+    bloc.style.display = 'flex';
+    bloc.classList.add('stale');
+    document.getElementById('on-air-label').textContent = 'En attente';
+    document.getElementById('on-air-titre').textContent = 'Aucun morceau';
+    document.getElementById('on-air-artiste').textContent = '—';
+    document.getElementById('countdown').textContent = '--:--';
+    document.getElementById('on-air-cover').style.backgroundImage = '';
+    document.getElementById('on-air-extrait').style.display = 'none';
+    return;
+  }
+
   bloc.style.display = 'flex';
+
+  // Détermine si le morceau est "vieux"
+  const maintenant = Math.floor(Date.now() / 1000);
+  const debut = Number(r.start_ts) || 0;
+  const age = debut ? maintenant - debut : 0;
+  const estVieux = age > SEUIL_VIEUX_MORCEAU;
+
+  if (estVieux) {
+    bloc.classList.add('stale');
+    document.getElementById('on-air-label').textContent = 'Dernier morceau connu';
+    document.getElementById('countdown-label').textContent = 'Il y a';
+  } else {
+    bloc.classList.remove('stale');
+    document.getElementById('on-air-label').textContent = 'Morceau en cours';
+    document.getElementById('countdown-label').textContent = 'Durée';
+  }
+
+  DERNIER_MORCEAU_TS = debut;
+  DERNIER_MORCEAU_DUREE = r.duree_sec
+    || (r.end_ts && r.start_ts ? r.end_ts - r.start_ts : 0);
+
   document.getElementById('on-air-titre').textContent = r.titre || '—';
   document.getElementById('on-air-artiste').textContent = r.artistes || '—';
+
   const cover = document.getElementById('on-air-cover');
   if (r.cover_deezer) cover.style.backgroundImage = "url('" + r.cover_deezer + "')";
+  else if (r.cover_uri) cover.style.backgroundImage = "url('" + r.cover_uri + "')";
   else cover.style.backgroundImage = '';
+
   const extrait = document.getElementById('on-air-extrait');
-  if (r.preview_mp3) {
+  if (r.preview_mp3 && !estVieux) {
     extrait.href = r.preview_mp3;
     extrait.style.display = 'inline-flex';
   } else {
     extrait.style.display = 'none';
   }
-  const dur = r.duree_sec ? r.duree_sec : (r.end_ts && r.start_ts ? r.end_ts - r.start_ts : null);
-  document.getElementById('countdown').textContent = dur ? formatDuree(dur) : '--:--';
+
+  majCompteur();
 }
+
+function majCompteur() {
+  const el = document.getElementById('countdown');
+  if (!el || !DERNIER_MORCEAU_TS) return;
+  const sec = Math.floor(Date.now() / 1000) - DERNIER_MORCEAU_TS;
+  if (sec > SEUIL_VIEUX_MORCEAU) { el.textContent = '--:--'; return; }
+  if (DERNIER_MORCEAU_DUREE > 0 && sec >= DERNIER_MORCEAU_DUREE) {
+    el.textContent = formatDuree(DERNIER_MORCEAU_DUREE);
+    return;
+  }
+  el.textContent = formatDuree(sec);
+}
+setInterval(majCompteur, 1000);
 
 function formatDuree(sec) {
   const m = String(Math.floor(sec / 60)).padStart(2, '0');
@@ -481,6 +639,9 @@ function formatDuree(sec) {
   return m + ':' + s;
 }
 
+// ============================================================
+// DÉMARRAGE
+// ============================================================
 charger();
 setInterval(charger, AUTO_REFRESH);
 </script>
