@@ -1,0 +1,659 @@
+{
+  "genere_le": "2026-09-29T10:05:04.387201",
+  "genere_ts": 1790661904,
+  "volume": {
+    "nb_diffusions": 41,
+    "nb_artistes": 38,
+    "nb_titres": 40,
+    "premiere_date": "2026-09-29",
+    "derniere_date": "2026-09-29",
+    "heures": 2.2,
+    "duree_moy": 193.3
+  },
+  "top_artistes": [
+    {
+      "artistes": "Patrick Bruel",
+      "nb_diffusions": 2,
+      "minutes": 7.6
+    },
+    {
+      "artistes": "Dominique Barret",
+      "nb_diffusions": 2,
+      "minutes": 7.6
+    },
+    {
+      "artistes": "Electric Light Orchestra",
+      "nb_diffusions": 2,
+      "minutes": 6.1
+    },
+    {
+      "artistes": "Michael Jackson",
+      "nb_diffusions": 1,
+      "minutes": 5.9
+    },
+    {
+      "artistes": "Al Corley",
+      "nb_diffusions": 1,
+      "minutes": 5.0
+    },
+    {
+      "artistes": "Scorpions",
+      "nb_diffusions": 1,
+      "minutes": 4.8
+    },
+    {
+      "artistes": "Peter Gabriel",
+      "nb_diffusions": 1,
+      "minutes": 4.6
+    },
+    {
+      "artistes": "Johnny Hallyday",
+      "nb_diffusions": 1,
+      "minutes": 4.0
+    },
+    {
+      "artistes": "Talk Talk",
+      "nb_diffusions": 1,
+      "minutes": 3.8
+    },
+    {
+      "artistes": "Alain Barrière",
+      "nb_diffusions": 1,
+      "minutes": 3.8
+    },
+    {
+      "artistes": "Florent Pagny",
+      "nb_diffusions": 1,
+      "minutes": 3.7
+    },
+    {
+      "artistes": "Abba",
+      "nb_diffusions": 1,
+      "minutes": 3.7
+    },
+    {
+      "artistes": "Joe Dassin",
+      "nb_diffusions": 1,
+      "minutes": 3.5
+    },
+    {
+      "artistes": "Michel Admette",
+      "nb_diffusions": 1,
+      "minutes": 3.3
+    },
+    {
+      "artistes": "Sega Sega",
+      "nb_diffusions": 1,
+      "minutes": 3.1
+    },
+    {
+      "artistes": "Louis Chedid & Yvan Cassar",
+      "nb_diffusions": 1,
+      "minutes": 3.1
+    },
+    {
+      "artistes": "Louis Chedid",
+      "nb_diffusions": 1,
+      "minutes": 3.1
+    },
+    {
+      "artistes": "Lucky Blondo",
+      "nb_diffusions": 1,
+      "minutes": 3.0
+    },
+    {
+      "artistes": "Luc Donat",
+      "nb_diffusions": 1,
+      "minutes": 3.0
+    },
+    {
+      "artistes": "Louis Armstrong & Ella Fitzgerald",
+      "nb_diffusions": 1,
+      "minutes": 3.0
+    },
+    {
+      "artistes": "Louis Armstrong",
+      "nb_diffusions": 1,
+      "minutes": 3.0
+    },
+    {
+      "artistes": "Riz Ortolani & Katyna Ranieri",
+      "nb_diffusions": 1,
+      "minutes": 2.9
+    },
+    {
+      "artistes": "Patti Labelle",
+      "nb_diffusions": 1,
+      "minutes": 2.9
+    },
+    {
+      "artistes": "Mitch Miller",
+      "nb_diffusions": 1,
+      "minutes": 2.9
+    },
+    {
+      "artistes": "Diana Ross",
+      "nb_diffusions": 1,
+      "minutes": 2.9
+    },
+    {
+      "artistes": "Di Quinto Rocco",
+      "nb_diffusions": 1,
+      "minutes": 2.9
+    },
+    {
+      "artistes": "Olympe Chabert",
+      "nb_diffusions": 1,
+      "minutes": 2.8
+    },
+    {
+      "artistes": "Georges Jouvin",
+      "nb_diffusions": 1,
+      "minutes": 2.8
+    },
+    {
+      "artistes": "Ray Charles",
+      "nb_diffusions": 1,
+      "minutes": 2.5
+    },
+    {
+      "artistes": "Bobby Darin",
+      "nb_diffusions": 1,
+      "minutes": 2.5
+    }
+  ],
+  "top_titres": [
+    {
+      "artistes": "Abba",
+      "titre": "Head Over Heels",
+      "nb_diffusions": 1,
+      "minutes": 3.7
+    },
+    {
+      "artistes": "Al Corley",
+      "titre": "Cold Dresses",
+      "nb_diffusions": 1,
+      "minutes": 5.0
+    },
+    {
+      "artistes": "Alain Barrière",
+      "titre": "C'Est La Vie",
+      "nb_diffusions": 1,
+      "minutes": 3.8
+    },
+    {
+      "artistes": "Bobby Darin",
+      "titre": "Things",
+      "nb_diffusions": 1,
+      "minutes": 2.5
+    },
+    {
+      "artistes": "Conway Twitty",
+      "titre": "Linda On My Mind",
+      "nb_diffusions": 1,
+      "minutes": 2.2
+    },
+    {
+      "artistes": "Di Quinto Rocco",
+      "titre": "Ce soir on va danser",
+      "nb_diffusions": 1,
+      "minutes": 2.9
+    },
+    {
+      "artistes": "Diana Ross",
+      "titre": "Stop! In The Name Of Love",
+      "nb_diffusions": 1,
+      "minutes": 2.9
+    },
+    {
+      "artistes": "Dominique Barret",
+      "titre": "Mon Cœur Épris",
+      "nb_diffusions": 1,
+      "minutes": 3.8
+    },
+    {
+      "artistes": "Dominique Barret",
+      "titre": "Mon cœur épris",
+      "nb_diffusions": 1,
+      "minutes": 3.8
+    },
+    {
+      "artistes": "Electric Light Orchestra",
+      "titre": "Rock 'N' Roll Is King",
+      "nb_diffusions": 1,
+      "minutes": 3.1
+    },
+    {
+      "artistes": "Electric Light Orchestra",
+      "titre": "Rock'N'Roll Is King",
+      "nb_diffusions": 1,
+      "minutes": 3.1
+    },
+    {
+      "artistes": "Florent Pagny",
+      "titre": "Chanter",
+      "nb_diffusions": 1,
+      "minutes": 3.7
+    },
+    {
+      "artistes": "Georges Jouvin",
+      "titre": "Le Silence",
+      "nb_diffusions": 1,
+      "minutes": 2.8
+    },
+    {
+      "artistes": "Isabelle Aubret",
+      "titre": "La Ville Est Là",
+      "nb_diffusions": 1,
+      "minutes": 2.4
+    },
+    {
+      "artistes": "Jean Ferrat",
+      "titre": "Sacré Felicien",
+      "nb_diffusions": 1,
+      "minutes": 2.4
+    },
+    {
+      "artistes": "Jean François Maurice",
+      "titre": "Juliette",
+      "nb_diffusions": 1,
+      "minutes": 1.9
+    },
+    {
+      "artistes": "Joe Dassin",
+      "titre": "Et l'amour s'en va",
+      "nb_diffusions": 1,
+      "minutes": 3.5
+    },
+    {
+      "artistes": "Johnny Hallyday",
+      "titre": "Le Pénitencier",
+      "nb_diffusions": 1,
+      "minutes": 4.0
+    },
+    {
+      "artistes": "Les Chats Sauvages",
+      "titre": "Tu Peins Ton Visage",
+      "nb_diffusions": 1,
+      "minutes": 2.2
+    },
+    {
+      "artistes": "Little Tony",
+      "titre": "Return To Sender",
+      "nb_diffusions": 1,
+      "minutes": 1.9
+    },
+    {
+      "artistes": "Louis Armstrong",
+      "titre": "Dream A Little Dream Of Me",
+      "nb_diffusions": 1,
+      "minutes": 3.0
+    },
+    {
+      "artistes": "Louis Armstrong & Ella Fitzgerald",
+      "titre": "Dream a Little Dream of Me",
+      "nb_diffusions": 1,
+      "minutes": 3.0
+    },
+    {
+      "artistes": "Louis Chedid",
+      "titre": "Ainsi Soit-Il",
+      "nb_diffusions": 1,
+      "minutes": 3.1
+    },
+    {
+      "artistes": "Louis Chedid & Yvan Cassar",
+      "titre": "Ainsi Soit-il (Version Piano – Voix)",
+      "nb_diffusions": 1,
+      "minutes": 3.1
+    },
+    {
+      "artistes": "Louis Prima",
+      "titre": "Oh Marie",
+      "nb_diffusions": 1,
+      "minutes": 2.4
+    },
+    {
+      "artistes": "Luc Donat",
+      "titre": "In P'Tit Bière Siouplait",
+      "nb_diffusions": 1,
+      "minutes": 3.0
+    },
+    {
+      "artistes": "Lucky Blondo",
+      "titre": "Tout le monde un jour",
+      "nb_diffusions": 1,
+      "minutes": 3.0
+    },
+    {
+      "artistes": "Michael Jackson",
+      "titre": "Thriller",
+      "nb_diffusions": 1,
+      "minutes": 5.9
+    },
+    {
+      "artistes": "Michel Admette",
+      "titre": "Madame Albert",
+      "nb_diffusions": 1,
+      "minutes": 3.3
+    },
+    {
+      "artistes": "Mitch Miller",
+      "titre": "The Yellow Rose Of Texas",
+      "nb_diffusions": 1,
+      "minutes": 2.9
+    }
+  ],
+  "heures": [
+    {
+      "heure": 9,
+      "nb": 24
+    },
+    {
+      "heure": 10,
+      "nb": 17
+    }
+  ],
+  "jours": [
+    {
+      "date": "2026-09-29",
+      "nb": 41
+    }
+  ],
+  "semaine": [
+    {
+      "jour": "Mardi",
+      "nb": 41
+    }
+  ],
+  "recurrents": [],
+  "titres_recurrents": [],
+  "diversifies": [
+    {
+      "artistes": "Patrick Bruel",
+      "nb_titres": 2,
+      "nb": 2
+    },
+    {
+      "artistes": "Electric Light Orchestra",
+      "nb_titres": 2,
+      "nb": 2
+    },
+    {
+      "artistes": "Dominique Barret",
+      "nb_titres": 2,
+      "nb": 2
+    }
+  ],
+  "annees": [
+    {
+      "annee": 2024,
+      "nb_diffusions": 1
+    },
+    {
+      "annee": 2021,
+      "nb_diffusions": 1
+    },
+    {
+      "annee": 2015,
+      "nb_diffusions": 1
+    },
+    {
+      "annee": 2014,
+      "nb_diffusions": 1
+    },
+    {
+      "annee": 2004,
+      "nb_diffusions": 2
+    },
+    {
+      "annee": 2003,
+      "nb_diffusions": 1
+    },
+    {
+      "annee": 1984,
+      "nb_diffusions": 2
+    },
+    {
+      "annee": 1983,
+      "nb_diffusions": 1
+    },
+    {
+      "annee": 1981,
+      "nb_diffusions": 1
+    },
+    {
+      "annee": 1977,
+      "nb_diffusions": 1
+    },
+    {
+      "annee": 1971,
+      "nb_diffusions": 1
+    },
+    {
+      "annee": 1960,
+      "nb_diffusions": 1
+    },
+    {
+      "annee": 1950,
+      "nb_diffusions": 1
+    },
+    {
+      "annee": 1944,
+      "nb_diffusions": 1
+    }
+  ],
+  "explicit": [],
+  "albums": [
+    {
+      "album": "Things & Other Things",
+      "artistes": "Bobby Darin",
+      "nb": 1
+    },
+    {
+      "album": "The Very Best Of",
+      "artistes": "Talk Talk",
+      "nb": 1
+    },
+    {
+      "album": "The Frim Fram Sauce (Mono Version) - EP",
+      "artistes": "Louis Armstrong & Ella Fitzgerald",
+      "nb": 1
+    },
+    {
+      "album": "Taxidermie",
+      "artistes": "Philippe B",
+      "nb": 1
+    },
+    {
+      "album": "Square Rooms",
+      "artistes": "Al Corley",
+      "nb": 1
+    },
+    {
+      "album": "Si ou di oui",
+      "artistes": "Dominique Barret",
+      "nb": 1
+    },
+    {
+      "album": "Salut les copains",
+      "artistes": "Lucky Blondo",
+      "nb": 1
+    },
+    {
+      "album": "Live 2014",
+      "artistes": "Patrick Bruel",
+      "nb": 1
+    },
+    {
+      "album": "La musique du séga (feat. Les Brigands 2000)",
+      "artistes": "Michel Admette",
+      "nb": 1
+    },
+    {
+      "album": "Intégrale",
+      "artistes": "Joe Dassin",
+      "nb": 1
+    },
+    {
+      "album": "Haut les coeurs - EP (Pt. 1)",
+      "artistes": "Olympe Chabert",
+      "nb": 1
+    },
+    {
+      "album": "En noires et blanches (Parce que - La Collection)",
+      "artistes": "Louis Chedid & Yvan Cassar",
+      "nb": 1
+    },
+    {
+      "album": "Ce soir on va danser - Single",
+      "artistes": "Di Quinto Rocco",
+      "nb": 1
+    },
+    {
+      "album": "Capitol Collectors Series: Louis Prima",
+      "artistes": "Louis Prima",
+      "nb": 1
+    },
+    {
+      "album": "Addio Zio Tom (original motion picture soundtrack)",
+      "artistes": "Riz Ortolani & Katyna Ranieri",
+      "nb": 1
+    }
+  ],
+  "derniers_morceaux": [
+    {
+      "titre": "Return To Sender",
+      "artistes": "Little Tony",
+      "cover_deezer": null,
+      "cover_uri": null,
+      "preview_mp3": null,
+      "date": "2026-09-29",
+      "heure": 10,
+      "album": null,
+      "annee": null,
+      "start_ts": 1790661770
+    },
+    {
+      "titre": "Stop! In The Name Of Love",
+      "artistes": "Diana Ross",
+      "cover_deezer": null,
+      "cover_uri": null,
+      "preview_mp3": null,
+      "date": "2026-09-29",
+      "heure": 10,
+      "album": null,
+      "annee": null,
+      "start_ts": 1790661770
+    },
+    {
+      "titre": "Thriller",
+      "artistes": "Michael Jackson",
+      "cover_deezer": null,
+      "cover_uri": null,
+      "preview_mp3": null,
+      "date": "2026-09-29",
+      "heure": 10,
+      "album": null,
+      "annee": null,
+      "start_ts": 1790661770
+    },
+    {
+      "titre": "Sledgehammer",
+      "artistes": "Peter Gabriel",
+      "cover_deezer": null,
+      "cover_uri": null,
+      "preview_mp3": null,
+      "date": "2026-09-29",
+      "heure": 10,
+      "album": null,
+      "annee": null,
+      "start_ts": 1790661770
+    },
+    {
+      "titre": "C'Est La Vie",
+      "artistes": "Alain Barrière",
+      "cover_deezer": null,
+      "cover_uri": null,
+      "preview_mp3": null,
+      "date": "2026-09-29",
+      "heure": 10,
+      "album": null,
+      "annee": null,
+      "start_ts": 1790661770
+    },
+    {
+      "titre": "Tu Peins Ton Visage",
+      "artistes": "Les Chats Sauvages",
+      "cover_deezer": null,
+      "cover_uri": null,
+      "preview_mp3": null,
+      "date": "2026-09-29",
+      "heure": 10,
+      "album": null,
+      "annee": null,
+      "start_ts": 1790661770
+    },
+    {
+      "titre": "Linda On My Mind",
+      "artistes": "Conway Twitty",
+      "cover_deezer": null,
+      "cover_uri": null,
+      "preview_mp3": null,
+      "date": "2026-09-29",
+      "heure": 10,
+      "album": null,
+      "annee": null,
+      "start_ts": 1790661770
+    },
+    {
+      "titre": "I Don'T Need No Doctor",
+      "artistes": "Ray Charles",
+      "cover_deezer": null,
+      "cover_uri": null,
+      "preview_mp3": null,
+      "date": "2026-09-29",
+      "heure": 10,
+      "album": null,
+      "annee": null,
+      "start_ts": 1790661770
+    },
+    {
+      "titre": "Under The Same Sun",
+      "artistes": "Scorpions",
+      "cover_deezer": null,
+      "cover_uri": null,
+      "preview_mp3": null,
+      "date": "2026-09-29",
+      "heure": 10,
+      "album": null,
+      "annee": null,
+      "start_ts": 1790661770
+    },
+    {
+      "titre": "Le Pénitencier",
+      "artistes": "Johnny Hallyday",
+      "cover_deezer": null,
+      "cover_uri": null,
+      "preview_mp3": null,
+      "date": "2026-09-29",
+      "heure": 10,
+      "album": null,
+      "annee": null,
+      "start_ts": 1790661770
+    }
+  ],
+  "dernier_morceau": {
+    "titre": "Return To Sender",
+    "artistes": "Little Tony",
+    "cover_deezer": null,
+    "cover_uri": null,
+    "preview_mp3": null,
+    "date": "2026-09-29",
+    "heure": 10,
+    "album": null,
+    "annee": null,
+    "start_ts": 1790661770,
+    "end_ts": null
+  }
+}

@@ -1,0 +1,488 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Dom 2 — Monitor</title>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+<style>
+  :root {
+    --fd-blue: #003da5;
+    --fd-blue-2: #0066cc;
+    --fd-blue-light: #e8f0fa;
+    --fd-black: #0a0a0a;
+    --fd-gray: #f7f8fa;
+    --fd-border: #e2e6eb;
+    --fd-text: #1a1a1a;
+    --fd-muted: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  html, body {
+    background: #fff; color: var(--fd-text);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh; font-size: 14px;
+  }
+  .topbar {
+    background: var(--fd-black); color: #fff;
+    padding: 8px 24px; display: flex; align-items: center;
+    justify-content: space-between; font-size: 11px;
+    font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar .live { display: inline-flex; align-items: center; gap: 8px; }
+  .topbar .live::before {
+    content: ''; width: 8px; height: 8px;
+    background: var(--fd-blue-2); border-radius: 50%;
+    animation: blink 1.5s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .topbar .meta { color: #999; font-size: 10px; }
+  .refresh-btn {
+    background: transparent; border: 1px solid #444; color: #fff;
+    padding: 4px 12px; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .refresh-btn:hover { background: var(--fd-blue); border-color: var(--fd-blue); }
+  .header {
+    padding: 28px 24px;
+    background: linear-gradient(135deg, #003da5 0%, #0066cc 50%, #00a0e3 100%);
+    color: #fff;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .logo {
+    font-size: 42px; font-weight: 900; letter-spacing: -2px;
+    color: #fff; font-family: 'Arial Black', Arial, sans-serif;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+  }
+  .logo span { color: #b8d9ff; }
+  .logo-sub {
+    color: rgba(255,255,255,0.85); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 4px;
+    border-left: 1px solid rgba(255,255,255,0.3);
+    padding-left: 20px; font-weight: 700;
+  }
+  #etat {
+    background: var(--fd-gray); border-left: 4px solid var(--fd-blue);
+    padding: 10px 16px; font-size: 12px; margin: 16px 24px 0;
+    color: var(--fd-muted); text-transform: uppercase;
+    letter-spacing: 1px; font-weight: 600;
+  }
+  #etat.erreur { background: #ffe5e9; color: #c4001e; }
+  .on-air {
+    margin: 16px 24px 24px; background: #fff;
+    border: 1px solid var(--fd-border);
+    border-left: 6px solid var(--fd-blue);
+    padding: 20px; display: flex; align-items: center; gap: 20px;
+  }
+  .on-air .cover {
+    width: 100px; height: 100px; background: var(--fd-gray);
+    background-size: cover; background-position: center;
+    flex-shrink: 0; border: 1px solid var(--fd-border);
+  }
+  .on-air .info { flex: 1; min-width: 0; }
+  .on-air .label {
+    color: var(--fd-blue); font-size: 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 3px;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+  }
+  .on-air .label::before {
+    content: ''; width: 8px; height: 8px;
+    background: var(--fd-blue-2); border-radius: 50%;
+    animation: blink 1.5s infinite;
+  }
+  .on-air .titre {
+    font-size: 26px; font-weight: 900; color: var(--fd-black);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    text-transform: uppercase;
+  }
+  .on-air .artiste {
+    color: var(--fd-blue); font-size: 15px;
+    margin-top: 4px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .on-air .extrait {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--fd-blue); color: #fff; font-size: 11px;
+    margin-top: 12px; padding: 6px 12px; text-decoration: none;
+    text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800;
+  }
+  .on-air .extrait:hover { background: var(--fd-blue-2); }
+  .on-air .countdown { text-align: right; font-variant-numeric: tabular-nums; }
+  .on-air .countdown-label {
+    color: var(--fd-muted); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 2px; font-weight: 700;
+  }
+  .on-air .countdown-value {
+    font-size: 38px; font-weight: 900; color: var(--fd-blue);
+    margin-top: 4px;
+  }
+  .kpis {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px; background: var(--fd-border);
+    border: 1px solid var(--fd-border); margin: 0 24px 24px;
+  }
+  .kpi { background: #fff; padding: 20px; position: relative; }
+  .kpi:hover { background: var(--fd-gray); }
+  .kpi::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: linear-gradient(90deg, var(--fd-blue), var(--fd-blue-2));
+  }
+  .kpi-label {
+    color: var(--fd-muted); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 2px; font-weight: 700;
+  }
+  .kpi-value {
+    font-size: 38px; font-weight: 900; color: var(--fd-black);
+    margin-top: 6px; letter-spacing: -1.5px;
+  }
+  .conteneur { max-width: 1600px; margin: 0 auto; padding: 0 24px 60px; }
+  .section-titre {
+    font-size: 14px; font-weight: 900; text-transform: uppercase;
+    letter-spacing: 3px; color: var(--fd-black);
+    margin: 32px 0 12px; padding-bottom: 8px;
+    border-bottom: 3px solid var(--fd-black);
+    display: inline-block;
+  }
+  .grille {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 16px; margin-bottom: 16px;
+  }
+  .grille-3 {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px; margin-bottom: 16px;
+  }
+  .carte { background: #fff; border: 1px solid var(--fd-border); }
+  .carte-titre {
+    padding: 12px 16px; font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 2px;
+    color: #fff; background: linear-gradient(90deg, var(--fd-black), var(--fd-blue));
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .carte-titre .badge {
+    background: var(--fd-blue-2); color: #fff; padding: 2px 8px;
+    font-size: 9px; font-weight: 900; letter-spacing: 1px;
+  }
+  .carte-corps { padding: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td {
+    padding: 10px 12px; text-align: left;
+    border-bottom: 1px solid var(--fd-border);
+  }
+  th {
+    color: #fff; font-weight: 800; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    background: var(--fd-black);
+  }
+  tr:hover { background: var(--fd-gray); }
+  .rang {
+    display: inline-block; width: 24px; text-align: center;
+    font-weight: 900; margin-right: 8px;
+  }
+  .rang.top3 { background: var(--fd-blue); color: #fff; padding: 2px 0; }
+  .pochette-cell {
+    width: 40px; height: 40px;
+    background: var(--fd-gray); background-size: cover;
+    background-position: center;
+    border: 1px solid var(--fd-border);
+    display: inline-block; vertical-align: middle;
+    margin-right: 10px;
+  }
+  .vide {
+    color: var(--fd-muted); font-style: italic; padding: 24px;
+    text-align: center; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  footer {
+    margin-top: 60px; padding: 32px 24px;
+    background: var(--fd-black); color: #999;
+    text-align: center; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 3px; font-weight: 700;
+  }
+  footer strong { color: var(--fd-blue-2); }
+  @media (max-width: 700px) {
+    .logo { font-size: 28px; }
+    .logo-sub { display: none; }
+    .kpi-value { font-size: 28px; }
+    .on-air { flex-direction: column; text-align: center; }
+    .on-air .countdown { text-align: center; }
+    .grille { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="live">En direct</div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="meta" id="horodatage">—</div>
+    <button class="refresh-btn" onclick="charger()">↻ Recharger</button>
+  </div>
+</div>
+
+<div class="header">
+  <div class="logo">FREE <span>DOM</span> 2</div>
+  <div class="logo-sub">Monitor Programmation</div>
+</div>
+
+<div id="etat">Initialisation...</div>
+
+<div class="on-air" id="on-air" style="display:none;">
+  <div class="cover" id="on-air-cover"></div>
+  <div class="info">
+    <div class="label" id="on-air-label">Morceau en cours</div>
+    <div class="titre" id="on-air-titre">—</div>
+    <div class="artiste" id="on-air-artiste">—</div>
+    <a class="extrait" id="on-air-extrait" href="#" target="_blank" style="display:none;">▶ Extraire 30s</a>
+  </div>
+  <div class="countdown">
+    <div class="countdown-label" id="countdown-label">Durée</div>
+    <div class="countdown-value" id="countdown">--:--</div>
+  </div>
+</div>
+
+<div class="kpis" id="kpis"></div>
+
+<div class="conteneur">
+  <h2 class="section-titre">Classement</h2>
+  <div class="grille">
+    <div class="carte"><div class="carte-titre">Top artistes <span class="badge">TOP 15</span></div><div class="carte-corps"><div id="chart-artistes"></div></div></div>
+    <div class="carte"><div class="carte-titre">Top titres <span class="badge">TOP 15</span></div><div class="carte-corps"><div id="chart-titres"></div></div></div>
+  </div>
+
+  <h2 class="section-titre">Répartition</h2>
+  <div class="grille">
+    <div class="carte"><div class="carte-titre">Par heure</div><div class="carte-corps"><div id="chart-heures"></div></div></div>
+    <div class="carte"><div class="carte-titre">Par jour de la semaine</div><div class="carte-corps"><div id="chart-semaine"></div></div></div>
+  </div>
+
+  <div class="carte" style="margin-bottom:16px;">
+    <div class="carte-titre">Évolution journalière</div>
+    <div class="carte-corps"><div id="chart-jours"></div></div>
+  </div>
+
+  <h2 class="section-titre">Analyses</h2>
+  <div class="grille-3">
+    <div class="carte"><div class="carte-titre">Par année</div><div class="carte-corps"><div id="chart-annees"></div></div></div>
+    <div class="carte"><div class="carte-titre">Explicit vs Clean</div><div class="carte-corps"><div id="chart-explicit"></div></div></div>
+    <div class="carte"><div class="carte-titre">Top albums</div><div class="carte-corps"><div id="table-albums"></div></div></div>
+  </div>
+
+  <h2 class="section-titre">Détails</h2>
+  <div class="grille">
+    <div class="carte"><div class="carte-titre">Artistes récurrents</div><div class="carte-corps"><div id="table-recurrents"></div></div></div>
+    <div class="carte"><div class="carte-titre">Titres récurrents</div><div class="carte-corps"><div id="table-titres-rec"></div></div></div>
+  </div>
+
+  <div class="grille">
+    <div class="carte"><div class="carte-titre">Artistes diversifiés</div><div class="carte-corps"><div id="table-diversif"></div></div></div>
+  </div>
+
+  <h2 class="section-titre">Derniers morceaux</h2>
+  <div class="carte" style="margin-bottom:24px;">
+    <div class="carte-titre">Fil des diffusions</div>
+    <div class="carte-corps"><div id="table-derniers"></div></div>
+  </div>
+</div>
+
+<footer>
+  <strong>FREE DOM 2 MONITOR</strong> · Playlist freedom.fr · Enrichissement iTunes · v1.1
+</footer>
+
+<script>
+const AUTO_REFRESH = 120000;
+let DERNIER_TS = 0;
+
+async function charger() {
+  const etat = document.getElementById('etat');
+  try {
+    const rep = await fetch('data.json?t=' + Date.now());
+    if (!rep.ok) throw new Error('HTTP ' + rep.status);
+    const data = await rep.json();
+    etat.className = '';
+    etat.textContent = 'Données synchronisées';
+    document.getElementById('horodatage').textContent =
+      'Mise à jour : ' + new Date(data.genere_ts * 1000).toLocaleString('fr-FR');
+    construire(data);
+    chargerOnAir(data.dernier_morceau);
+  } catch (e) {
+    etat.className = 'erreur';
+    etat.textContent = 'Erreur : ' + e.message;
+  }
+}
+
+function construire(d) {
+  const vide = '<div class="vide">Pas encore de données</div>';
+  const vol = d.volume || {};
+  const kpis = [
+    ['Diffusions', vol.nb_diffusions || 0],
+    ['Artistes', vol.nb_artistes || 0],
+    ['Titres', vol.nb_titres || 0],
+    ['Heures', (vol.heures || 0).toFixed(2)],
+    ['Durée moy.', (vol.duree_moy || 0).toFixed(0) + 's']
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(function(k) {
+    return '<div class="kpi"><div class="kpi-label">' + k[0] + '</div><div class="kpi-value">' + k[1] + '</div></div>';
+  }).join('');
+
+  const layout = {
+    paper_bgcolor: '#fff', plot_bgcolor: '#fff',
+    font: { color: '#1a1a1a', size: 11, family: 'Helvetica Neue, Arial' },
+    margin: { l: 150, r: 20, t: 10, b: 40 },
+    xaxis: { gridcolor: '#eef', zerolinecolor: '#ccc' },
+    yaxis: { gridcolor: '#eef', zerolinecolor: '#ccc' }
+  };
+  const opts = { displayModeBar: false, responsive: true };
+  const BLUE = '#003da5', BLUE2 = '#0066cc';
+
+  if (d.top_artistes && d.top_artistes.length) {
+    const a = d.top_artistes.slice(0, 15);
+    Plotly.newPlot('chart-artistes', [{
+      type: 'bar', orientation: 'h',
+      x: a.map(function(r) { return r.minutes || r.nb_diffusions; }),
+      y: a.map(function(r) { return r.artistes; }),
+      marker: { color: BLUE }
+    }], Object.assign({}, layout, { yaxis: { autorange: 'reversed' } }), opts);
+  } else document.getElementById('chart-artistes').innerHTML = vide;
+
+  if (d.top_titres && d.top_titres.length) {
+    const t = d.top_titres.slice(0, 15);
+    Plotly.newPlot('chart-titres', [{
+      type: 'bar', orientation: 'h',
+      x: t.map(function(r) { return r.nb_diffusions; }),
+      y: t.map(function(r) { return (r.artistes || '') + ' – ' + (r.titre || ''); }),
+      marker: { color: BLUE2 }
+    }], Object.assign({}, layout, { yaxis: { autorange: 'reversed' } }), opts);
+  } else document.getElementById('chart-titres').innerHTML = vide;
+
+  if (d.heures && d.heures.length) {
+    Plotly.newPlot('chart-heures', [{
+      type: 'bar', x: d.heures.map(function(r) { return r.heure; }),
+      y: d.heures.map(function(r) { return r.nb; }),
+      marker: { color: BLUE }
+    }], Object.assign({}, layout, { margin: { l: 40, r: 20, t: 10, b: 40 } }), opts);
+  } else document.getElementById('chart-heures').innerHTML = vide;
+
+  if (d.semaine && d.semaine.length) {
+    Plotly.newPlot('chart-semaine', [{
+      type: 'bar', x: d.semaine.map(function(r) { return r.jour; }),
+      y: d.semaine.map(function(r) { return r.nb; }),
+      marker: { color: BLUE2 }
+    }], Object.assign({}, layout, { margin: { l: 40, r: 20, t: 10, b: 40 } }), opts);
+  } else document.getElementById('chart-semaine').innerHTML = vide;
+
+  if (d.jours && d.jours.length) {
+    Plotly.newPlot('chart-jours', [{
+      type: 'scatter', mode: 'lines+markers',
+      x: d.jours.map(function(r) { return r.date; }),
+      y: d.jours.map(function(r) { return r.nb; }),
+      line: { color: BLUE, width: 3 },
+      marker: { size: 10, color: BLUE },
+      fill: 'tozeroy', fillcolor: 'rgba(0, 61, 165, 0.08)'
+    }], Object.assign({}, layout, { margin: { l: 40, r: 20, t: 10, b: 60 } }), opts);
+  } else document.getElementById('chart-jours').innerHTML = vide;
+
+  if (d.annees && d.annees.length) {
+    Plotly.newPlot('chart-annees', [{
+      type: 'bar', x: d.annees.map(function(r) { return r.annee; }),
+      y: d.annees.map(function(r) { return r.nb_diffusions; }),
+      marker: { color: BLUE2 }
+    }], Object.assign({}, layout, { margin: { l: 40, r: 20, t: 10, b: 40 } }), opts);
+  } else document.getElementById('chart-annees').innerHTML = vide;
+
+  if (d.explicit && d.explicit.length) {
+    Plotly.newPlot('chart-explicit', [{
+      type: 'pie', labels: d.explicit.map(function(r) { return r.type_contenu; }),
+      values: d.explicit.map(function(r) { return r.nb; }), hole: 0.6,
+      marker: { colors: [BLUE, BLUE2, '#c0c0c0'] },
+      textinfo: 'label+percent'
+    }], Object.assign({}, layout, { margin: { l: 20, r: 20, t: 10, b: 20 } }), opts);
+  } else document.getElementById('chart-explicit').innerHTML = vide;
+
+  rendreTable('table-albums', d.albums || [], [
+    { c: 'album', t: 'Album' }, { c: 'artistes', t: 'Artiste' }, { c: 'nb', t: 'Diff.' }
+  ], vide);
+  rendreTable('table-recurrents', d.recurrents || [], [
+    { c: 'artistes', t: 'Artiste' }, { c: 'nb_jours', t: 'Jours' }, { c: 'nb_diffusions', t: 'Diff.' }
+  ], vide);
+  rendreTable('table-titres-rec', d.titres_recurrents || [], [
+    { c: 'artistes', t: 'Artiste' }, { c: 'titre', t: 'Titre' }, { c: 'nb_jours', t: 'Jours' }
+  ], vide);
+  rendreTable('table-diversif', d.diversifies || [], [
+    { c: 'artistes', t: 'Artiste' }, { c: 'nb_titres', t: 'Titres' }, { c: 'nb', t: 'Diff.' }
+  ], vide);
+
+  const derniers = (d.derniers_morceaux || []).slice(0, 15);
+  if (derniers.length) {
+    let html = '<table><thead><tr><th></th><th>Heure</th><th>Artiste</th><th>Titre</th><th>Album</th></tr></thead><tbody>';
+    for (let i = 0; i < derniers.length; i++) {
+      const m = derniers[i];
+      const heure = m.heure != null ? String(m.heure).padStart(2, '0') + 'h' : '—';
+      const pochette = m.cover_deezer
+        ? '<span class="pochette-cell" style="background-image:url(\'' + m.cover_deezer + '\')"></span>'
+        : '<span class="pochette-cell"></span>';
+      html += '<tr><td style="width:50px">' + pochette + '</td><td>' + heure + '</td><td>' + (m.artistes || '—') + '</td><td>' + (m.titre || '—') + '</td><td>' + (m.album || '—') + '</td></tr>';
+    }
+    html += '</tbody></table>';
+    document.getElementById('table-derniers').innerHTML = html;
+  } else {
+    document.getElementById('table-derniers').innerHTML = vide;
+  }
+}
+
+function rendreTable(id, rows, cols, vide) {
+  const cible = document.getElementById(id);
+  if (!rows || !rows.length) { cible.innerHTML = vide; return; }
+  let html = '<table><thead><tr>';
+  for (let i = 0; i < cols.length; i++) html += '<th>' + cols[i].t + '</th>';
+  html += '</tr></thead><tbody>';
+  for (let i = 0; i < Math.min(rows.length, 20); i++) {
+    const r = rows[i];
+    html += '<tr>';
+    for (let j = 0; j < cols.length; j++) {
+      let v = r[cols[j].c];
+      if (v === undefined || v === null) v = '';
+      if (j === 0 && typeof v === 'string' && cols.length > 1) {
+        const cls = i < 3 ? 'rang top3' : 'rang';
+        v = '<span class="' + cls + '">' + (i + 1) + '</span>' + v;
+      }
+      html += '<td>' + v + '</td>';
+    }
+    html += '</tr>';
+  }
+  cible.innerHTML = html + '</tbody></table>';
+}
+
+function chargerOnAir(r) {
+  const bloc = document.getElementById('on-air');
+  if (!r || !r.titre) { bloc.style.display = 'none'; return; }
+  bloc.style.display = 'flex';
+  document.getElementById('on-air-titre').textContent = r.titre || '—';
+  document.getElementById('on-air-artiste').textContent = r.artistes || '—';
+  const cover = document.getElementById('on-air-cover');
+  if (r.cover_deezer) cover.style.backgroundImage = "url('" + r.cover_deezer + "')";
+  else cover.style.backgroundImage = '';
+  const extrait = document.getElementById('on-air-extrait');
+  if (r.preview_mp3) {
+    extrait.href = r.preview_mp3;
+    extrait.style.display = 'inline-flex';
+  } else {
+    extrait.style.display = 'none';
+  }
+  const dur = r.duree_sec ? r.duree_sec : (r.end_ts && r.start_ts ? r.end_ts - r.start_ts : null);
+  document.getElementById('countdown').textContent = dur ? formatDuree(dur) : '--:--';
+}
+
+function formatDuree(sec) {
+  const m = String(Math.floor(sec / 60)).padStart(2, '0');
+  const s = String(sec % 60).padStart(2, '0');
+  return m + ':' + s;
+}
+
+charger();
+setInterval(charger, AUTO_REFRESH);
+</script>
+</body>
+</html>
