@@ -46,6 +46,10 @@
 
 Idéal pour suivre la programmation musicale de Free Dom 2, découvrir la scène musicale réunionnaise et internationale, ou analyser les tendances.
 
+
+<img width="1683" height="3585" alt="Screenshot 2026-09-29 at 09-59-13 Free Dom 2 — Monitor" src="https://github.com/user-attachments/assets/a5506720-e4d5-4cc8-a06a-0423c7867fd6" />
+
+
 ---
 
 ## ✨ Fonctionnalités
